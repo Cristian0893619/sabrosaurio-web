@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detalle de Receta - Sabrosaurio</title>
-    <link rel="icon" type="image/png" href="sabrosaurio.ico">
     <style>
         /* ESTILOS BASE */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
@@ -60,14 +59,48 @@
         .btn-volver:hover { background: var(--mexico-red); transform: translateY(-3px); }
 
         @media (max-width: 768px) { .recipe-layout { grid-template-columns: 1fr; } .detail-header { height: 250px; } .title-overlay h1 { font-size: 2.5rem; } }
+
+        /* --- ESTILOS DE LA ANIMACIÓN DE CARGA (TACO) --- */
+        .taco-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #006847; 
+            z-index: 99999;
+            display: flex; justify-content: center; align-items: center; flex-direction: column;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+        }
+        .taco-overlay.active { opacity: 1; pointer-events: all; }
+        
+        .el-taco-giratorio {
+            font-size: 6rem; 
+            animation: girarTaco 3s linear infinite; 
+            transition: transform 0.5s cubic-bezier(0.6, -0.28, 0.735, 0.045); 
+            transform: scale(0);
+        }
+        
+        .taco-overlay.active .el-taco-giratorio { transform: scale(1); }
+        .taco-overlay.bye-bye .el-taco-giratorio { transform: scale(0) rotate(720deg); transition: transform 0.5s ease-in; }
+        
+        .texto-cargando { color: white; margin-top: 20px; font-weight: bold; font-size: 1.5rem; animation: parpadeo 1s infinite; font-family: sans-serif; }
+
+        @keyframes girarTaco { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes parpadeo { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
+
+    <div class="taco-overlay" id="pantalla-taco-global">
+        <span class="el-taco-giratorio">🌮</span>
+        <div class="texto-cargando">Preparando pedido...</div>
+    </div>
+
     <header>
         <div class="logo"><h1>Sabro<span>saurio</span></h1></div>
         <p>Receta Completa</p>
     </header>
-    <nav><a href="sabrosaurio.html">← Volver al Menú</a></nav>
+    
+    <nav>
+        <a href="sabrosaurio.html">← Volver al Menú</a>
+    </nav>
 
     <div class="container" id="main-content">
         <h2 style="color:white; text-align:center; margin-top:50px;">Cargando receta...</h2>
@@ -76,6 +109,36 @@
     <script>
         const API_URL = '/api/recetas';
         const IMAGES_URL = '/public/';
+
+        // --- SCRIPT DE ANIMACIÓN (MODO DELEGACIÓN) ---
+        // Usamos delegación de eventos para capturar clics en elementos creados dinámicamente
+        document.addEventListener('click', (e) => {
+            const link = e.target.closest('a'); // Busca el <a> más cercano al clic
+
+            if (link) {
+                const destino = link.getAttribute('href');
+                
+                // Validaciones para ignorar
+                if (!destino || destino.startsWith('javascript:') || destino.startsWith('#') || link.target === '_blank') return;
+
+                // Si es un enlace real, activamos taco
+                e.preventDefault();
+                activarModoTaco(destino);
+            }
+        });
+
+        function activarModoTaco(urlDestino) {
+            const overlay = document.getElementById('pantalla-taco-global');
+            overlay.classList.add('active');
+            
+            setTimeout(() => {
+                overlay.classList.add('bye-bye'); 
+                setTimeout(() => {
+                    window.location.href = urlDestino;
+                }, 400); 
+            }, 800); 
+        }
+        // ---------------------------------------------
 
         function procesarTimers(texto) {
             if (!texto) return "";
@@ -106,7 +169,6 @@
                 const r = data.find(x => x._id === id);
 
                 if(r) {
-                    // Listas
                     const lIng = (r.ingredientes || "").split('\n').filter(x=>x).map(x=>`<li>${x}</li>`).join('');
                     const lUt = (r.utensilios || "No especificados").split('\n').filter(x=>x).map(x=>`<li>${x}</li>`).join('');
                     const steps = procesarTimers(r.preparacion || "Pasos no especificados.");
@@ -119,7 +181,7 @@
                                     <div class="meta-info">
                                         <span>⏱ ${r.tiempo || '--'}</span>
                                         <span>🔥 ${r.dificultad || 'Media'}</span>
-                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div class="detail-body">
