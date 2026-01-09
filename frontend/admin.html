@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Sabrosaurio</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: #f4f4f4; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #d35400; margin-bottom: 20px; }
+        
+        /* Formulario */
+        label { font-weight: bold; display: block; margin-top: 15px; color: #333; }
+        input, textarea, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        .fila { display: flex; gap: 15px; } .col { flex: 1; }
+        
+        /* Botones del Formulario */
+        .btn-submit { width: 100%; padding: 12px; background: #d35400; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 20px; font-weight: bold; transition: 0.3s; }
+        .btn-submit:hover { background: #e67e22; }
+        
+        /* Botón Cancelar (oculto por defecto) */
+        #btn-cancelar { background: #7f8c8d; margin-top: 10px; display: none; }
+        #btn-cancelar:hover { background: #95a5a6; }
+
+        /* Lista */
+        .lista-actual { margin-top: 40px; border-top: 2px solid #eee; padding-top: 20px; }
+        .item { background: #fff; border: 1px solid #ddd; padding: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        
+        .acciones { display: flex; gap: 10px; }
+        .btn-edit { background: #f39c12; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 4px; }
+        .btn-delete { background: #c0392b; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h1 style="margin:0;">🦖 Panel Admin</h1>
+            <button onclick="cerrarSesion()" style="width:auto; background:#80f88a; margin:0;">🔒 Salir</button>
+        </div>
+        
+        <form id="formReceta">
+            <input type="hidden" id="idEditando">
+
+            <label>Información Básica</label>
+            <input type="text" id="nombre" placeholder="Nombre (ej. Tacos al Pastor)" required>
+            <textarea id="descripcion" placeholder="Descripción corta..." rows="2" required></textarea>
+            
+            <div class="fila">
+                <div class="col"><label>Tiempo</label><input type="text" id="tiempo" placeholder="Ej. 2 h 30 min"></div>
+                <div class="col"><label>Dificultad</label>
+                    <select id="dificultad">
+                        <option value="Baja">Baja</option>
+                        <option value="Media">Media</option>
+                        <option value="Alta">Alta</option>
+                    </select>
+                </div>
+            </div>
+
+            <label>Nombre de Imagen</label>
+            <input type="text" id="imagen" placeholder="Ej. alpastor.jpg" required>
+
+            <div class="fila">
+                <div class="col">
+                    <label>🛒 Ingredientes</label>
+                    <textarea id="ingredientes" rows="6" placeholder="- 1kg carne..."></textarea>
+                </div>
+                <div class="col">
+                    <label>🍴 Utensilios</label>
+                    <textarea id="utensilios" rows="6" placeholder="- Olla grande..."></textarea>
+                </div>
+            </div>
+
+            <label>👨‍🍳 Instrucciones (Usa (TIMER:X) para cronómetros)</label>
+            <textarea id="preparacion" rows="6" placeholder="Paso 1... (TIMER:10)"></textarea>
+            
+            <button type="submit" class="btn-submit" id="btn-guardar">Guardar Nueva Receta</button>
+            <button type="button" class="btn-submit" id="btn-cancelar" onclick="resetForm()">Cancelar Edición</button>
+        </form>
+
+        <div class="lista-actual">
+            <h3>Recetas Guardadas:</h3>
+            <div id="lista-recetas">Cargando...</div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api/recetas';
+        let todasLasRecetas = []; 
+
+        // 1. CARGAR LISTA
+        async function cargarRecetas() {
+            try {
+                const res = await fetch(API_URL);
+                todasLasRecetas = await res.json();
+                
+                const div = document.getElementById('lista-recetas');
+                div.innerHTML = '';
+                
+                todasLasRecetas.forEach(r => {
+                    div.innerHTML += `
+                        <div class="item">
+                            <span><strong>${r.nombre}</strong> <small>(${r.tiempo || '-'})</small></span> 
+                            <div class="acciones">
+                                <button class="btn-edit" type="button" onclick="cargarParaEditar('${r._id}')">✏️ Editar</button>
+                                <button class="btn-delete" type="button" onclick="borrar('${r._id}')">🗑️ Borrar</button>
+                            </div>
+                        </div>`;
+                });
+            } catch (error) {
+                console.error("Error cargando recetas:", error);
+            }
+        }
+
+        // 2. MODO EDICIÓN
+        function cargarParaEditar(id) {
+            const receta = todasLasRecetas.find(r => r._id === id);
+            if(!receta) return;
+
+            document.getElementById('idEditando').value = receta._id;
+            document.getElementById('nombre').value = receta.nombre;
+            document.getElementById('descripcion').value = receta.descripcion;
+            document.getElementById('tiempo').value = receta.tiempo || '';
+            document.getElementById('dificultad').value = receta.dificultad || 'Media';
+            document.getElementById('imagen').value = receta.imagen;
+            document.getElementById('ingredientes').value = receta.ingredientes || '';
+            document.getElementById('utensilios').value = receta.utensilios || '';
+            document.getElementById('preparacion').value = receta.preparacion || '';
+
+            // Cambio visual de botones
+            const btnGuardar = document.getElementById('btn-guardar');
+            btnGuardar.innerText = "Actualizar Receta";
+            btnGuardar.style.background = "#2980b9"; 
+            document.getElementById('btn-cancelar').style.display = "block";
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 3. CANCELAR
+        function resetForm() {
+            document.getElementById('formReceta').reset();
+            document.getElementById('idEditando').value = ""; 
+            
+            const btnGuardar = document.getElementById('btn-guardar');
+            btnGuardar.innerText = "Guardar Nueva Receta";
+            btnGuardar.style.background = "#d35400"; 
+            document.getElementById('btn-cancelar').style.display = "none";
+        }
+
+        // 4. GUARDAR (CON MANEJO DE ERRORES)
+        document.getElementById('formReceta').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // RECOLECTAMOS DATOS (¡SIN PRECIO!)
+            const data = {
+                nombre: document.getElementById('nombre').value,
+                descripcion: document.getElementById('descripcion').value,
+                tiempo: document.getElementById('tiempo').value,
+                dificultad: document.getElementById('dificultad').value,
+                imagen: document.getElementById('imagen').value,
+                ingredientes: document.getElementById('ingredientes').value,
+                utensilios: document.getElementById('utensilios').value,
+                preparacion: document.getElementById('preparacion').value
+            };
+
+            const id = document.getElementById('idEditando').value;
+            let respuesta;
+
+            try {
+                if (id) {
+                    // ACTUALIZAR (PUT)
+                    respuesta = await fetch(`${API_URL}/${id}`, { 
+                        method: 'PUT', 
+                        headers: {'Content-Type':'application/json'}, 
+                        body: JSON.stringify(data)
+                    });
+                } else {
+                    // CREAR (POST)
+                    respuesta = await fetch(API_URL, { 
+                        method: 'POST', 
+                        headers: {'Content-Type':'application/json'}, 
+                        body: JSON.stringify(data)
+                    });
+                }
+
+                if (respuesta.ok) {
+                    alert('¡Éxito! Receta guardada.');
+                    resetForm();
+                    cargarRecetas();
+                } else {
+                    // Si el servidor dice que no
+                    const errorData = await respuesta.json();
+                    alert('Error del servidor: ' + (errorData.mensaje || 'Revisa la consola'));
+                    console.error("Error detallado:", errorData);
+                }
+
+            } catch (error) {
+                alert('Error de conexión: Asegúrate de que node server.js esté corriendo.');
+                console.error(error);
+            }
+        });
+
+        // 5. BORRAR
+        async function borrar(id) { 
+            if(confirm('¿Seguro que quieres borrarla?')) { 
+                await fetch(`${API_URL}/${id}`, { method: 'DELETE' }); 
+                if(document.getElementById('idEditando').value === id) resetForm();
+                cargarRecetas(); 
+            } 
+        }
+
+        // EL GUARDIA (Seguridad)
+        if (!sessionStorage.getItem('esAdmin')) {
+            window.location.href = 'login.html';
+        }
+        
+        function cerrarSesion() {
+            sessionStorage.removeItem('esAdmin');
+            window.location.href = 'login.html';
+        }
+
+        cargarRecetas();
+    </script>
+</body>
+</html>

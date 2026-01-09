@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todas las Recetas - Sabrosaurio</title>
+    <link rel="icon" type="image/png" href="sabrosaurio.ico">
+    <style>
+        /* --- ESTILOS (Idénticos al Home) --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        :root {
+            --mexico-red: #CE1126; --mexico-green: #006847; --bright-green: #08df25;
+            --white: #ffffff; --bg-page: var(--mexico-green); --primary: var(--mexico-red); --secondary: var(--mexico-green); --light: #fff;        
+        }
+        body { background-color: var(--bg-page); color: #333; line-height: 1.6; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+
+        /* Header & Nav */
+        header { background-color: var(--primary); color: var(--light); padding: 1rem; text-align: center; border-bottom: 4px solid var(--white); box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .logo { display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+        .logo h1 { font-size: 2.5rem; font-weight: 800; } .logo span { color: var(--bright-green); }
+        nav { background-color: var(--white); padding: 0.8rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        nav ul { display: flex; justify-content: center; list-style: none; flex-wrap: wrap; }
+        nav a { color: black; text-decoration: none; font-weight: bold; text-transform: uppercase; margin: 0 15px; transition: color 0.3s; }
+        nav a:hover { color: var(--primary); }
+
+        /* Botones */
+        .btn { display: inline-block; background-color: var(--secondary); color: var(--light); padding: 12px 25px; border-radius: 30px; text-decoration: none; font-weight: bold; border: 3px solid #003524; transition: 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.2); cursor: pointer;}
+        .btn:hover { background-color: var(--primary); border-color: #800000; transform: translateY(-3px); }
+        
+        /* Grid de Recetas */
+        .recipes-section { padding: 2.5rem; background-color: var(--light); border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); text-align: center; margin-top: 2rem; }
+        .section-title { text-align: center; margin-bottom: 2rem; color: var(--primary); font-weight: 700; border-bottom: 4px solid var(--secondary); display: inline-block; padding-bottom: 5px; }
+        .recipes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 2rem; }
+        
+        .recipe-card { background-color: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border: 1px solid #eee; display: flex; flex-direction: column; transition: transform 0.3s; }
+        .recipe-card:hover { transform: translateY(-10px); border-color: var(--secondary); }
+        .recipe-img { height: 200px; background-color: #ddd; background-size: cover; background-position: center; }
+        .recipe-content { padding: 1.5rem; display: flex; flex-direction: column; flex-grow: 1; text-align: left; }
+        .recipe-title { font-size: 1.4rem; color: var(--primary); margin-bottom: 0.5rem; }
+        .recipe-desc { color: #666; margin-bottom: 1rem; flex-grow: 1; text-align: justify; }
+        .recipe-meta { display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--secondary); font-weight: 600; margin-bottom: 1rem; background: #f0fff4; padding: 5px; border-radius: 5px; }
+
+        footer { background-color: var(--primary); color: var(--light); text-align: center; padding: 2rem; margin-top: 3rem; border-top: 4px solid var(--light); }
+
+        /* --- ANIMACIÓN TACO (Copiada del Home) --- */
+        .taco-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--mexico-green); z-index: 9999;
+            display: flex; justify-content: center; align-items: center; flex-direction: column;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+        }
+        .taco-overlay.active { opacity: 1; pointer-events: all; }
+        
+        .el-taco-giratorio {
+            font-size: 6rem; animation: girarTaco 3s linear infinite;
+            transition: transform 0.5s cubic-bezier(0.6, -0.28, 0.735, 0.045); 
+            transform: scale(0);
+        }
+        
+        .taco-overlay.active .el-taco-giratorio { transform: scale(1); }
+        .taco-overlay.bye-bye .el-taco-giratorio { transform: scale(0) rotate(720deg); transition: transform 0.5s ease-in; }
+        .texto-cargando { color: white; margin-top: 20px; font-weight: bold; font-size: 1.5rem; animation: parpadeo 1s infinite; }
+
+        @keyframes girarTaco { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes parpadeo { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <div class="taco-overlay" id="pantalla-taco">
+        <span class="el-taco-giratorio">🌮</span>
+        <div class="texto-cargando">Buscando recetas...</div>
+    </div>
+
+    <header>
+        <div class="logo"><h1>Sabro<span>saurio</span></h1></div>
+        <p>Catálogo Completo</p>
+    </header>
+    
+    <nav>
+        <ul>
+            <li><a href="sabrosaurio.html" onclick="irAReceta(event, this.href)">← Volver al Inicio</a></li>
+            <li><a href="sabrosaurio.html#contacto" onclick="irAReceta(event, this.href)">Contacto</a></li>
+        </ul>
+    </nav>
+    
+    <div class="container">
+        
+        <section class="recipes-section">
+            <h2 class="section-title">Todas Nuestras Recetas</h2>
+            <p style="margin-bottom: 20px; color: #666;">Explora nuestra colección completa de sabores mexicanos.</p>
+            
+            <div id="contenedor-recetas" class="recipes-grid">
+                <p style="width:100%; text-align:center;">Cargando catálogo...</p>
+            </div>
+            
+            <br>
+            <a href="sabrosaurio.html" class="btn" onclick="irAReceta(event, this.href)">Regresar al Inicio</a>
+        </section>
+    </div>
+    
+    <footer id="contacto">
+        <p>Sabrosaurio &copy; 2025</p>
+    </footer>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api/recetas';
+        const IMAGES_URL = 'http://localhost:3000/public/';
+
+        // FUNCIÓN ANIMACIÓN
+        function irAReceta(event, urlDestino) {
+            event.preventDefault();
+            const overlay = document.getElementById('pantalla-taco');
+            overlay.classList.add('active');
+            setTimeout(() => {
+                overlay.classList.add('bye-bye'); 
+                setTimeout(() => {
+                    window.location.href = urlDestino;
+                }, 400); 
+            }, 800); 
+        }
+
+        async function cargarMenu() {
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) throw new Error('Error servidor');
+                const recetas = await response.json();
+                
+                const contenedor = document.getElementById('contenedor-recetas');
+                contenedor.innerHTML = ''; 
+
+                if (recetas.length === 0) { contenedor.innerHTML = '<p>No hay recetas disponibles.</p>'; return; }
+
+                // --- AQUÍ ESTÁ LA DIFERENCIA: NO USAMOS .slice() ---
+                // Mostramos TODAS las recetas que llegaron
+                recetas.forEach(receta => {
+                    const htmlReceta = `
+                        <div class="recipe-card">
+                            <div class="recipe-img" style="background-image: url('${IMAGES_URL}${receta.imagen || 'tacos.jpg'}');"></div>
+                            <div class="recipe-content">
+                                <h3 class="recipe-title">${receta.nombre}</h3>
+                                <p class="recipe-desc">${receta.descripcion}</p>
+                                
+                                <div class="recipe-meta">
+                                    <span>⏱ ${receta.tiempo || 'N/A'}</span>
+                                    <span>🔥 ${receta.dificultad || 'Media'}</span>
+                                </div>
+                                
+                                <a href="detalle.html?id=${receta._id}" class="btn" onclick="irAReceta(event, this.href)">Ver Receta</a>
+                            </div>
+                        </div>
+                    `;
+                    contenedor.innerHTML += htmlReceta;
+                });
+            } catch (error) {
+                console.error(error);
+                document.getElementById('contenedor-recetas').innerHTML = '<p style="color:red;">Error de conexión.</p>';
+            }
+        }
+        cargarMenu();
+    </script>
+</body>
+</html>

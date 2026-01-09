@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="sabrosaurio.ico">
+    
+    <title>Sabrosaurio</title>
+    <style>
+        /* --- Estilos Generales --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            /* COLORES DE LA BANDERA DE MÉXICO */
+            --mexico-red: #CE1126;   /* Rojo oficial */
+            --mexico-green: #006847; /* Verde oficial (Fondo) */
+            --bright-green: #08df25; /* Verde Brillante (Para el logo Saurio) */
+            --white: #ffffff;
+            --black: #000000;
+            
+            /* Verde "Más Intenso" para el borde de los botones */
+            --intense-green: #003524;
+            
+            /* Asignación de variables */
+            --primary: var(--mexico-red);
+            --secondary: var(--mexico-green);
+            --bg-page: var(--mexico-green); 
+            --light: #fff;        
+        }
+        
+        body {
+            background-color: var(--bg-page);
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* --- Header y Navegación --- */
+        header {
+            background-color: var(--primary); /* Fondo Rojo */
+            color: var(--light);
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            border-bottom: 4px solid var(--white);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0px; 
+            margin-bottom: 10px;
+        }
+        
+        .logo h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+        }
+        
+        .logo span {
+            color: var(--bright-green); /* Verde brillante original */
+            text-shadow: none; 
+        }
+        
+        nav {
+            background-color: var(--white);
+            padding: 0.8rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        nav ul {
+            display: flex;
+            justify-content: center;
+            list-style: none;
+            flex-wrap: wrap;
+        }
+        
+        nav li {
+            margin: 0 15px;
+        }
+        
+        nav a {
+            color: var(--black); /* Texto negro */
+            text-decoration: none;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: color 0.3s;
+        }
+        
+        nav a:hover {
+            color: var(--primary);
+        }
+
+        /* --- Componentes Reutilizables (Botones) --- */
+        .btn {
+            display: inline-block;
+            background-color: var(--secondary);
+            color: var(--light);
+            padding: 12px 25px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            /* Borde verde intenso por defecto */
+            border: 3px solid var(--intense-green);
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+        
+        .btn:hover {
+            background-color: var(--primary);
+            border-color: #800000; /* Borde rojo oscuro al pasar el mouse */
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--primary);
+            position: relative;
+            padding-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background-color: var(--secondary);
+        }
+        
+        /* --- Sección Hero --- */
+        .hero {
+            text-align: center;
+            padding: 4rem 2rem;
+            background-color: var(--primary);
+            border-radius: 15px;
+            margin-bottom: 3rem;
+            color: var(--light);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            border: 6px solid #800000; /* Borde rojo oscuro */
+        }
+        
+        .hero h2 {
+            font-size: 2.8rem;
+            margin-bottom: 1rem;
+            color: var(--white);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .hero p {
+            font-size: 1.3rem;
+            max-width: 700px;
+            margin: 0 auto 2rem;
+            font-weight: 500;
+        }
+
+        /* --- Sección de Bienvenida y Galería --- */
+        .welcome-section {
+            background-color: var(--light);
+            padding: 3rem 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+
+        .welcome-text {
+            max-width: 800px;
+            margin: 0 auto 2rem auto;
+            font-size: 1.15rem;
+            color: #444;
+            text-align: justify;
+        }
+
+        .welcome-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .gallery-placeholder {
+            height: 200px;
+            background-color: #eee;
+            border-radius: 10px;
+            /* Propiedades para que la imagen se vea bien */
+            background-size: cover;
+            background-position: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: 2px solid var(--primary);
+        }
+
+        .gallery-placeholder:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        /* --- Sección de Recetas --- */
+        .recipes-section {
+            margin: 3rem 0;
+            padding: 2.5rem;
+            background-color: var(--light);
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .recipes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .recipe-card {
+            background-color: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+            border: 1px solid #eee;
+        }
+        
+        .recipe-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--secondary);
+        }
+        
+        .recipe-img {
+            height: 200px;
+            background-color: #ddd;
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .recipe-content {
+            padding: 1.5rem;
+        }
+        
+        .recipe-title {
+            font-size: 1.4rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+        
+        .recipe-desc {
+            color: #666;
+            margin-bottom: 1rem;
+            text-align: justify; /* Texto justificado */
+        }
+        
+        .recipe-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: var(--secondary);
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        /* --- Footer --- */
+        footer {
+            background-color: var(--primary);
+            color: var(--light);
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+            border-top: 4px solid var(--light);
+        }
+        
+        @media (max-width: 768px) {
+            .hero h2 { font-size: 2rem; }
+            .btn { width: 100%; max-width: 200px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <h1>Sabro<span>saurio</span></h1>
+        </div>
+        <p>Recetas auténticas y deliciosas de la cocina mexicana</p>
+    </header>
+    
+    <nav>
+        <ul>
+            <li><a href="#inicio">Inicio</a></li>
+            <li><a href="#bienvenida">Bienvenida</a></li>
+            <li><a href="#recetas">Recetas Destacadas</a></li>
+            <li><a href="todaslasrecetas.html">Todas las Recetas</a></li>
+            <li><a href="#contacto">Contacto</a></li>
+        </ul>
+    </nav>
+    
+    <div class="container">
+        <section class="hero" id="inicio">
+            <h2>Descubre el auténtico sabor de México</h2>
+            <p>Explora nuestras recetas tradicionales y modernas. Cada receta incluye instrucciones detalladas para garantizar resultados perfectos en tu propia cocina.</p>
+            <a href="#recetas" class="btn">Ver Recetas Abajo</a>
+        </section>
+        
+        <section class="welcome-section" id="bienvenida">
+            <h2 class="section-title">La Magia de la Gastronomía Mexicana</h2>
+            <div class="welcome-text">
+                <p>Bienvenido a Sabrosaurio. La cocina mexicana es mucho más que solo ingredientes; es historia, cultura y pasión en cada bocado. Reconocida como Patrimonio Inmaterial de la Humanidad por la UNESCO, nuestra gastronomía es una explosión de colores, aromas y sabores vibrantes que cuentan la historia de nuestros ancestros. Desde los mercados bulliciosos hasta la mesa familiar, te invitamos a enamorarte de la hermosa tradición culinaria de México.</p>
+            </div>
+            
+            <div class="welcome-gallery">
+                <div class="gallery-placeholder" style="background-image: url('piramide.jpg');"></div>
+                <div class="gallery-placeholder" style="background-image: url('maiz.jpg');"></div>
+                <div class="gallery-placeholder" style="background-image: url('cdmx.jpg');"></div>
+                <div class="gallery-placeholder" style="background-image: url('tacos.jpg');"></div>
+            </div>
+        </section>
+        
+        <section class="recipes-section" id="recetas">
+            <h2 class="section-title">Nuestras Recetas Destacadas</h2>
+            <div class="recipes-grid">
+                
+                <div class="recipe-card">
+                    <div class="recipe-img" style="background-image: url('alpastor.jpg');"></div>
+                    <div class="recipe-content">
+                        <h3 class="recipe-title">Tacos al Pastor</h3>
+                        <p class="recipe-desc">Deliciosos tacos con carne marinada, piña y cilantro. Un clásico de la street food mexicana.</p>
+                        <div class="recipe-meta">
+                            <span>Tiempo: 4 h 35 min</span>
+                            <span>Dificultad: Media</span>
+                        </div>
+                        <a href="alpastor.html" class="btn">Ver Receta</a>
+                    </div>
+                </div>
+                
+                <div class="recipe-card">
+                    <div class="recipe-img" style="background-image: url('molepoblano.jpg');"></div>
+                    <div class="recipe-content">
+                        <h3 class="recipe-title">Mole Poblano</h3>
+                        <p class="recipe-desc">El rey de la cocina mexicana. Una salsa compleja con chocolate y especias servida con pollo.</p>
+                        <div class="recipe-meta">
+                            <span>Tiempo: 2 h 30 min</span>
+                            <span>Dificultad: Alta</span>
+                        </div>
+                        <a href="molepoblano.html" class="btn">Ver Receta</a>
+                    </div>
+                </div>
+                
+                <div class="recipe-card">
+                    <div class="recipe-img" style="background-image: url('chiles.jpg');"></div>
+                    <div class="recipe-content">
+                        <h3 class="recipe-title">Chiles en Nogada</h3>
+                        <p class="recipe-desc">Chiles poblanos rellenos de picadillo, bañados en salsa de nuez y granada. Un platillo patriótico.</p>
+                        <div class="recipe-meta">
+                            <span>Tiempo: 2 h</span>
+                            <span>Dificultad: Alta</span>
+                        </div>
+                        <a href="chiles.html" class="btn">Ver Receta</a>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 3rem;">
+                <a href="todaslasrecetas.html" class="btn" style="padding: 15px 40px; font-size: 1.1rem;">Ver todas las recetas</a>
+            </div>
+
+        </section>
+    </div>
+    
+    <footer id="contacto">
+        <p>Sabrosaurio &copy; 2025 - Todos los derechos reservados</p>
+        <p>Contacto: Sabrosaurio@outlook.com | Tel: 55-12345678</p>
+    </footer>
+</body>
+</html>

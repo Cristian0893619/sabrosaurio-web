@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle de Receta - Sabrosaurio</title>
+    <link rel="icon" type="image/png" href="sabrosaurio.ico">
+    <style>
+        /* ESTILOS BASE */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        :root {
+            --mexico-red: #CE1126; --mexico-green: #006847; --bright-green: #08df25;
+            --white: #ffffff; --bg-page: var(--mexico-green); --secondary: var(--mexico-green);
+        }
+        body { background-color: var(--bg-page); color: #333; line-height: 1.6; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+
+        /* HEADER & NAV */
+        header { background-color: var(--mexico-red); color: white; padding: 1rem; text-align: center; border-bottom: 4px solid white; }
+        .logo h1 { font-size: 2.5rem; font-weight: 800; } .logo span { color: var(--bright-green); }
+        nav { background: white; padding: 0.8rem; text-align: center; }
+        nav a { color: black; text-decoration: none; font-weight: bold; text-transform: uppercase; margin: 0 15px; }
+        nav a:hover { color: var(--mexico-red); }
+
+        /* TARJETA DETALLE */
+        .recipe-detail-card { background: white; border-radius: 15px; overflow: hidden; margin-top: 2rem; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        
+        .detail-header { height: 350px; background-size: cover; background-position: center; position: relative; }
+        .detail-header::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 150px; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); }
+        
+        .title-overlay { position: absolute; bottom: 20px; left: 30px; z-index: 2; text-shadow: 2px 2px 4px black; }
+        .title-overlay h1 { font-size: 3.5rem; color: white; margin: 0; line-height: 1; }
+        .meta-info { display: flex; gap: 20px; margin-top: 10px; color: var(--bright-green); font-weight: bold; font-size: 1.2rem; }
+
+        .detail-body { padding: 40px; }
+        .description { font-size: 1.2rem; font-style: italic; color: #555; border-left: 5px solid var(--mexico-red); padding-left: 20px; margin-bottom: 40px; background: #f9f9f9; padding: 20px; border-radius: 0 10px 10px 0; }
+
+        /* LAYOUT DE COLUMNAS */
+        .recipe-layout { display: grid; grid-template-columns: 1fr 2fr; gap: 40px; }
+        
+        /* CAJAS LATERALES (Ingredientes y Utensilios) */
+        .sidebar-box { background: #f4f4f4; padding: 25px; border-radius: 12px; margin-bottom: 30px; border: 1px solid #ddd; }
+        .sidebar-box h3 { color: var(--mexico-green); border-bottom: 2px solid var(--mexico-red); display: inline-block; margin-bottom: 15px; font-size: 1.4rem; text-transform: uppercase; }
+        .sidebar-box ul { list-style: none; }
+        .sidebar-box li { padding: 8px 0; border-bottom: 1px dashed #ccc; display: flex; align-items: center; }
+        .sidebar-box li::before { content: '•'; color: var(--mexico-red); font-weight: bold; font-size: 1.5rem; margin-right: 10px; line-height: 0; }
+
+        /* SECCIÓN DE INSTRUCCIONES */
+        .instructions-section h3 { font-size: 2rem; color: var(--mexico-red); margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
+        .preparacion-text { font-size: 1.15rem; color: #333; line-height: 1.9; white-space: pre-wrap; }
+
+        /* TIMERS */
+        .btn-timer { background: #e67e22; color: white; border: none; padding: 4px 12px; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 0.9rem; margin-left: 8px; vertical-align: middle; display: inline-flex; align-items: center; gap: 5px; }
+        .btn-timer:hover { background: #d35400; transform: scale(1.05); }
+        .btn-timer.activo { background: var(--mexico-red); animation: pulse 1s infinite; cursor: wait; }
+        .btn-timer.terminado { background: #27ae60; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+
+        .btn-volver { display: block; width: 200px; margin: 40px auto 0; padding: 15px; text-align: center; background: var(--mexico-green); color: white; text-decoration: none; font-weight: bold; border-radius: 30px; transition: 0.3s; }
+        .btn-volver:hover { background: var(--mexico-red); transform: translateY(-3px); }
+
+        @media (max-width: 768px) { .recipe-layout { grid-template-columns: 1fr; } .detail-header { height: 250px; } .title-overlay h1 { font-size: 2.5rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo"><h1>Sabro<span>saurio</span></h1></div>
+        <p>Receta Completa</p>
+    </header>
+    <nav><a href="sabrosaurio.html">← Volver al Menú</a></nav>
+
+    <div class="container" id="main-content">
+        <h2 style="color:white; text-align:center; margin-top:50px;">Cargando receta...</h2>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api/recetas';
+        const IMAGES_URL = 'http://localhost:3000/public/';
+
+        function procesarTimers(texto) {
+            if (!texto) return "";
+            return texto.replace(/\(TIMER:(\d+)\)/g, (match, min) => 
+                `<button class="btn-timer" onclick="runTimer(this, ${min})">⏱ ${min} min</button>`
+            );
+        }
+
+        window.runTimer = function(btn, min) {
+            if(btn.classList.contains('activo')) return;
+            let sec = min * 60;
+            btn.classList.add('activo');
+            const int = setInterval(() => {
+                sec--;
+                let m = Math.floor(sec/60), s = sec%60;
+                btn.innerText = `⏳ ${m}:${s<10?'0'+s:s}`;
+                if (sec <= 0) { clearInterval(int); btn.classList.remove('activo'); btn.classList.add('terminado'); btn.innerText = "✅ ¡LISTO!"; alert("¡Tiempo terminado!"); }
+            }, 1000);
+        };
+
+        async function init() {
+            const id = new URLSearchParams(window.location.search).get('id');
+            if(!id) return;
+
+            try {
+                const res = await fetch(API_URL);
+                const data = await res.json();
+                const r = data.find(x => x._id === id);
+
+                if(r) {
+                    // Listas
+                    const lIng = (r.ingredientes || "").split('\n').filter(x=>x).map(x=>`<li>${x}</li>`).join('');
+                    const lUt = (r.utensilios || "No especificados").split('\n').filter(x=>x).map(x=>`<li>${x}</li>`).join('');
+                    const steps = procesarTimers(r.preparacion || "Pasos no especificados.");
+
+                    document.getElementById('main-content').innerHTML = `
+                        <div class="recipe-detail-card">
+                            <div class="detail-header" style="background-image: url('${IMAGES_URL}${r.imagen}');">
+                                <div class="title-overlay">
+                                    <h1>${r.nombre}</h1>
+                                    <div class="meta-info">
+                                        <span>⏱ ${r.tiempo || '--'}</span>
+                                        <span>🔥 ${r.dificultad || 'Media'}</span>
+                                        </div>
+                                </div>
+                            </div>
+                            <div class="detail-body">
+                                <div class="description">"${r.descripcion}"</div>
+                                
+                                <div class="recipe-layout">
+                                    <div class="sidebar">
+                                        <div class="sidebar-box">
+                                            <h3>🛒 Ingredientes</h3>
+                                            <ul>${lIng || '<li>Sin ingredientes</li>'}</ul>
+                                        </div>
+                                        <div class="sidebar-box">
+                                            <h3>🍴 Utensilios</h3>
+                                            <ul>${lUt}</ul>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="instructions-section">
+                                        <h3>👨‍🍳 Instrucciones</h3>
+                                        <div class="preparacion-text">${steps}</div>
+                                    </div>
+                                </div>
+                                
+                                <a href="sabrosaurio.html" class="btn-volver">Regresar al Menú</a>
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch (e) { console.error(e); }
+        }
+        init();
+    </script>
+</body>
+</html>

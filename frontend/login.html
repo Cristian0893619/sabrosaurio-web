@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso Admin - Sabrosaurio</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #006847; /* Verde México */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #333;
+        }
+        .login-card {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+            border: 4px solid #CE1126; /* Rojo México */
+        }
+        h1 { margin-bottom: 20px; color: #CE1126; }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 15px 0;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #006847;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        button:hover { background-color: #CE1126; }
+        .error { color: red; display: none; margin-top: 10px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <h1>🦖 Admin</h1>
+        <p>Introduce la contraseña maestra</p>
+        
+        <form id="loginForm">
+            <input type="password" id="password" placeholder="Contraseña..." required>
+            <button type="submit">Entrar</button>
+            <p class="error" id="msgError">¡Contraseña incorrecta!</p>
+        </form>
+        
+        <br>
+        <a href="sabrosaurio.html" style="color:#666; text-decoration:none;">← Volver al sitio</a>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const pass = document.getElementById('password').value;
+
+            // --- AQUÍ DEFINES TU CONTRASEÑA ---
+            const CONTRASENA_CORRECTA = "sabrosaurio123"; 
+
+            if (pass === CONTRASENA_CORRECTA) {
+                // Guardamos una "llave" en la memoria temporal del navegador
+                sessionStorage.setItem('esAdmin', 'true');
+                // Redirigimos al admin
+                window.location.href = 'admin.html';
+            } else {
+                document.getElementById('msgError').style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

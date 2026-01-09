@@ -1,0 +1,93 @@
+/* estilos.css */
+
+/* Reset y configuración base */
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+:root {
+    --mexico-red: #CE1126; 
+    --mexico-green: #006847; 
+    --bright-green: #08df25;
+    --white: #ffffff; 
+    --black: #000000; 
+    --intense-green: #003524;
+    --primary: var(--mexico-red); 
+    --secondary: var(--mexico-green);
+    --bg-page: var(--mexico-green); 
+    --light: #fff;
+}
+
+body { background-color: var(--bg-page); color: #333; line-height: 1.6; }
+.container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+
+/* Header y Nav */
+header { background-color: var(--primary); color: var(--light); padding: 1rem; text-align: center; border-bottom: 4px solid var(--white); }
+.logo h1 { font-size: 2.5rem; font-weight: 800; display: flex; justify-content: center; gap: 0; margin-bottom: 5px; }
+.logo span { color: var(--bright-green); }
+
+nav { background-color: var(--white); padding: 0.8rem; }
+nav ul { display: flex; justify-content: center; list-style: none; flex-wrap: wrap; }
+nav li { margin: 0 15px; }
+nav a { color: var(--black); text-decoration: none; font-weight: bold; text-transform: uppercase; transition: color 0.3s; }
+nav a:hover { color: var(--primary); }
+
+/* Estilos de la Cuadrícula y Secciones */
+.recipes-section { margin: 2rem 0; padding: 2.5rem; background-color: var(--light); border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+.section-title { text-align: center; margin-bottom: 2rem; color: var(--primary); font-weight: 700; font-size: 2rem; }
+
+.recipes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+/* Tarjetas de Recetas */
+.recipe-card { background-color: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border: 1px solid #eee; transition: transform 0.3s; }
+.recipe-card:hover { transform: translateY(-5px); border-color: var(--secondary); }
+
+.recipe-img { height: 200px; background-color: #ddd; background-size: cover; background-position: center; }
+.recipe-content { padding: 1.5rem; }
+.recipe-title { font-size: 1.4rem; margin-bottom: 0.5rem; color: var(--primary); }
+
+/* Descripción */
+.recipe-desc { color: #666; margin-bottom: 1rem; text-align: justify; font-size: 0.95rem; }
+
+/* Meta datos */
+.recipe-meta { display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--secondary); font-weight: 700; margin-bottom: 1rem; }
+
+/* Botones */
+.btn { display: inline-block; background-color: var(--secondary); color: var(--light); padding: 10px 20px; border-radius: 30px; text-decoration: none; font-weight: bold; border: 3px solid var(--intense-green); transition: all 0.3s; width: 100%; text-align: center; }
+.btn:hover { background-color: var(--primary); border-color: #800000; }
+
+/* Footer */
+footer { background-color: var(--primary); color: var(--light); text-align: center; padding: 2rem; margin-top: 3rem; border-top: 4px solid var(--light); }
+
+/* --- NUEVO: Estilos para el Filtro --- */
+.filters-container {
+    display: flex;
+    justify-content: flex-end; /* Alinea a la derecha */
+    align-items: center;
+    margin-bottom: 1.5rem;
+    gap: 10px;
+}
+
+.filters-container label {
+    font-weight: bold;
+    color: var(--primary);
+}
+
+.filter-select {
+    padding: 8px 15px;
+    border-radius: 20px;
+    border: 2px solid var(--secondary);
+    background-color: var(--white);
+    color: #333;
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.filter-select:hover {
+    background-color: var(--secondary);
+    color: var(--white);
+}
