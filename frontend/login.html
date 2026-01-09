@@ -127,4 +127,34 @@
             if (pass === CONTRASENA_CORRECTA) {
                 // Login correcto
                 msgError.style.display = 'none';
-                session
+                sessionStorage.setItem('esAdmin', 'true');
+                
+                // ¡ACTIVAMOS LA ANIMACIÓN EN LUGAR DE SALTAR DE GOLPE!
+                document.querySelector('.texto-cargando').innerText = "Acceso Concedido...";
+                activarModoTaco('admin.html');
+            } else {
+                msgError.style.display = 'block';
+                // Efecto visual de error (sacudir input)
+                const input = document.getElementById('password');
+                input.style.borderColor = 'red';
+                setTimeout(() => input.style.borderColor = '#ddd', 500);
+            }
+        });
+
+        // --- LÓGICA PARA EL BOTÓN "VOLVER" ---
+        document.addEventListener("DOMContentLoaded", () => {
+            const links = document.querySelectorAll('a');
+            links.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    const destino = link.getAttribute('href');
+                    if(destino && !destino.startsWith('#')) {
+                        e.preventDefault();
+                        document.querySelector('.texto-cargando').innerText = "Regresando...";
+                        activarModoTaco(destino);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
