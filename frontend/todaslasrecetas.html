@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Todas las Recetas - Sabrosaurio</title>
-    <link rel="icon" type="image/png" href="sabrosaurio.ico">
     <style>
         /* --- ESTILOS (Idénticos al Home) --- */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -43,10 +42,10 @@
 
         footer { background-color: var(--primary); color: var(--light); text-align: center; padding: 2rem; margin-top: 3rem; border-top: 4px solid var(--light); }
 
-        /* --- ANIMACIÓN TACO (Copiada del Home) --- */
+        /* --- ANIMACIÓN TACO (Uniforme) --- */
         .taco-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: var(--mexico-green); z-index: 9999;
+            background-color: var(--mexico-green); z-index: 99999;
             display: flex; justify-content: center; align-items: center; flex-direction: column;
             opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
         }
@@ -60,7 +59,7 @@
         
         .taco-overlay.active .el-taco-giratorio { transform: scale(1); }
         .taco-overlay.bye-bye .el-taco-giratorio { transform: scale(0) rotate(720deg); transition: transform 0.5s ease-in; }
-        .texto-cargando { color: white; margin-top: 20px; font-weight: bold; font-size: 1.5rem; animation: parpadeo 1s infinite; }
+        .texto-cargando { color: white; margin-top: 20px; font-weight: bold; font-size: 1.5rem; animation: parpadeo 1s infinite; font-family: sans-serif; }
 
         @keyframes girarTaco { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         @keyframes parpadeo { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
@@ -68,7 +67,7 @@
 </head>
 <body>
 
-    <div class="taco-overlay" id="pantalla-taco">
+    <div class="taco-overlay" id="pantalla-taco-global">
         <span class="el-taco-giratorio">🌮</span>
         <div class="texto-cargando">Buscando recetas...</div>
     </div>
@@ -80,8 +79,8 @@
     
     <nav>
         <ul>
-            <li><a href="sabrosaurio.html" onclick="irAReceta(event, this.href)">← Volver al Inicio</a></li>
-            <li><a href="sabrosaurio.html#contacto" onclick="irAReceta(event, this.href)">Contacto</a></li>
+            <li><a href="sabrosaurio.html">← Volver al Inicio</a></li>
+            <li><a href="sabrosaurio.html#contacto">Contacto</a></li>
         </ul>
     </nav>
     
@@ -96,7 +95,7 @@
             </div>
             
             <br>
-            <a href="sabrosaurio.html" class="btn" onclick="irAReceta(event, this.href)">Regresar al Inicio</a>
+            <a href="sabrosaurio.html" class="btn">Regresar al Inicio</a>
         </section>
     </div>
     
@@ -108,11 +107,26 @@
         const API_URL = '/api/recetas';
         const IMAGES_URL = '/public/';
 
-        // FUNCIÓN ANIMACIÓN
-        function irAReceta(event, urlDestino) {
-            event.preventDefault();
-            const overlay = document.getElementById('pantalla-taco');
+        // --- SCRIPT DE ANIMACIÓN (DELEGACIÓN DE EVENTOS) ---
+        document.addEventListener('click', (e) => {
+            const link = e.target.closest('a'); // Busca si hiciste click en un link
+
+            if (link) {
+                const destino = link.getAttribute('href');
+                
+                // Ignorar enlaces vacíos, javascript, anchors (#) o target blank
+                if (!destino || destino.startsWith('javascript:') || destino.startsWith('#') || link.target === '_blank') return;
+
+                // Si es un enlace bueno, activamos el taco
+                e.preventDefault();
+                activarModoTaco(destino);
+            }
+        });
+
+        function activarModoTaco(urlDestino) {
+            const overlay = document.getElementById('pantalla-taco-global');
             overlay.classList.add('active');
+            
             setTimeout(() => {
                 overlay.classList.add('bye-bye'); 
                 setTimeout(() => {
@@ -120,6 +134,7 @@
                 }, 400); 
             }, 800); 
         }
+        // ---------------------------------------------------
 
         async function cargarMenu() {
             try {
@@ -132,8 +147,6 @@
 
                 if (recetas.length === 0) { contenedor.innerHTML = '<p>No hay recetas disponibles.</p>'; return; }
 
-                // --- AQUÍ ESTÁ LA DIFERENCIA: NO USAMOS .slice() ---
-                // Mostramos TODAS las recetas que llegaron
                 recetas.forEach(receta => {
                     const htmlReceta = `
                         <div class="recipe-card">
@@ -147,7 +160,7 @@
                                     <span>🔥 ${receta.dificultad || 'Media'}</span>
                                 </div>
                                 
-                                <a href="detalle.html?id=${receta._id}" class="btn" onclick="irAReceta(event, this.href)">Ver Receta</a>
+                                <a href="detalle.html?id=${receta._id}" class="btn">Ver Receta</a>
                             </div>
                         </div>
                     `;
