@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Acceso Admin - Sabrosaurio</title>
     <style>
+        /* ESTILOS ORIGINALES */
         body {
             font-family: 'Segoe UI', sans-serif;
             background-color: #006847; /* Verde México */
@@ -24,6 +25,8 @@
             width: 100%;
             max-width: 400px;
             border: 4px solid #CE1126; /* Rojo México */
+            position: relative;
+            z-index: 10; /* Para que quede debajo de la animación si es necesario */
         }
         h1 { margin-bottom: 20px; color: #CE1126; }
         input {
@@ -50,9 +53,39 @@
         }
         button:hover { background-color: #CE1126; }
         .error { color: red; display: none; margin-top: 10px; font-weight: bold; }
+
+        /* --- ESTILOS DE LA ANIMACIÓN (NUEVO) --- */
+        .taco-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #006847; 
+            z-index: 99999;
+            display: flex; justify-content: center; align-items: center; flex-direction: column;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+        }
+        .taco-overlay.active { opacity: 1; pointer-events: all; }
+        
+        .el-taco-giratorio {
+            font-size: 6rem; 
+            animation: girarTaco 3s linear infinite; 
+            transition: transform 0.5s cubic-bezier(0.6, -0.28, 0.735, 0.045); 
+            transform: scale(0);
+        }
+        
+        .taco-overlay.active .el-taco-giratorio { transform: scale(1); }
+        .taco-overlay.bye-bye .el-taco-giratorio { transform: scale(0) rotate(720deg); transition: transform 0.5s ease-in; }
+        
+        .texto-cargando { color: white; margin-top: 20px; font-weight: bold; font-size: 1.5rem; animation: parpadeo 1s infinite; font-family: sans-serif; }
+
+        @keyframes girarTaco { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes parpadeo { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
+
+    <div class="taco-overlay" id="pantalla-taco-global">
+        <span class="el-taco-giratorio">🌮</span>
+        <div class="texto-cargando">Verificando...</div>
+    </div>
 
     <div class="login-card">
         <h1>🦖 Admin</h1>
@@ -69,22 +102,29 @@
     </div>
 
     <script>
+        // --- LÓGICA DE ANIMACIÓN ---
+        function activarModoTaco(urlDestino) {
+            const overlay = document.getElementById('pantalla-taco-global');
+            overlay.classList.add('active');
+            
+            setTimeout(() => {
+                overlay.classList.add('bye-bye'); 
+                setTimeout(() => {
+                    window.location.href = urlDestino;
+                }, 400); 
+            }, 800); 
+        }
+
+        // --- LÓGICA DE LOGIN ---
         document.getElementById('loginForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const pass = document.getElementById('password').value;
+            const msgError = document.getElementById('msgError');
 
             // --- AQUÍ DEFINES TU CONTRASEÑA ---
             const CONTRASENA_CORRECTA = "sabrosaurio123"; 
 
             if (pass === CONTRASENA_CORRECTA) {
-                // Guardamos una "llave" en la memoria temporal del navegador
-                sessionStorage.setItem('esAdmin', 'true');
-                // Redirigimos al admin
-                window.location.href = 'admin.html';
-            } else {
-                document.getElementById('msgError').style.display = 'block';
-            }
-        });
-    </script>
-</body>
-</html>
+                // Login correcto
+                msgError.style.display = 'none';
+                session
