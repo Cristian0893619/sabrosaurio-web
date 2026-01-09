@@ -17,7 +17,6 @@
         .btn-submit { width: 100%; padding: 12px; background: #d35400; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 20px; font-weight: bold; transition: 0.3s; }
         .btn-submit:hover { background: #e67e22; }
         
-        /* Botón Cancelar (oculto por defecto) */
         #btn-cancelar { background: #7f8c8d; margin-top: 10px; display: none; }
         #btn-cancelar:hover { background: #95a5a6; }
 
@@ -28,13 +27,44 @@
         .acciones { display: flex; gap: 10px; }
         .btn-edit { background: #f39c12; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 4px; }
         .btn-delete { background: #c0392b; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 4px; }
+
+        /* --- ESTILOS TACO --- */
+        .taco-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #006847; 
+            z-index: 99999;
+            display: flex; justify-content: center; align-items: center; flex-direction: column;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+        }
+        .taco-overlay.active { opacity: 1; pointer-events: all; }
+        
+        .el-taco-giratorio {
+            font-size: 6rem; 
+            animation: girarTaco 3s linear infinite; 
+            transition: transform 0.5s cubic-bezier(0.6, -0.28, 0.735, 0.045); 
+            transform: scale(0);
+        }
+        
+        .taco-overlay.active .el-taco-giratorio { transform: scale(1); }
+        .taco-overlay.bye-bye .el-taco-giratorio { transform: scale(0) rotate(720deg); transition: transform 0.5s ease-in; }
+        
+        .texto-cargando { color: white; margin-top: 20px; font-weight: bold; font-size: 1.5rem; animation: parpadeo 1s infinite; font-family: sans-serif; }
+
+        @keyframes girarTaco { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes parpadeo { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
+    
+    <div class="taco-overlay" id="pantalla-taco-global">
+        <span class="el-taco-giratorio">🌮</span>
+        <div class="texto-cargando">Cerrando sesión...</div>
+    </div>
+
     <div class="container">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
             <h1 style="margin:0;">🦖 Panel Admin</h1>
-            <button onclick="cerrarSesion()" style="width:auto; background:#80f88a; margin:0;">🔒 Salir</button>
+            <button onclick="cerrarSesion()" style="width:auto; background:#80f88a; border:none; padding:10px 20px; border-radius:5px; cursor:pointer;">🔒 Salir</button>
         </div>
         
         <form id="formReceta">
@@ -83,6 +113,7 @@
     </div>
 
     <script>
+        // RUTA RELATIVA
         const API_URL = '/api/recetas';
         let todasLasRecetas = []; 
 
@@ -125,7 +156,6 @@
             document.getElementById('utensilios').value = receta.utensilios || '';
             document.getElementById('preparacion').value = receta.preparacion || '';
 
-            // Cambio visual de botones
             const btnGuardar = document.getElementById('btn-guardar');
             btnGuardar.innerText = "Actualizar Receta";
             btnGuardar.style.background = "#2980b9"; 
@@ -145,11 +175,9 @@
             document.getElementById('btn-cancelar').style.display = "none";
         }
 
-        // 4. GUARDAR (CON MANEJO DE ERRORES)
+        // 4. GUARDAR
         document.getElementById('formReceta').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
-            // RECOLECTAMOS DATOS (¡SIN PRECIO!)
             const data = {
                 nombre: document.getElementById('nombre').value,
                 descripcion: document.getElementById('descripcion').value,
@@ -166,18 +194,12 @@
 
             try {
                 if (id) {
-                    // ACTUALIZAR (PUT)
                     respuesta = await fetch(`${API_URL}/${id}`, { 
-                        method: 'PUT', 
-                        headers: {'Content-Type':'application/json'}, 
-                        body: JSON.stringify(data)
+                        method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data)
                     });
                 } else {
-                    // CREAR (POST)
                     respuesta = await fetch(API_URL, { 
-                        method: 'POST', 
-                        headers: {'Content-Type':'application/json'}, 
-                        body: JSON.stringify(data)
+                        method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data)
                     });
                 }
 
@@ -186,15 +208,11 @@
                     resetForm();
                     cargarRecetas();
                 } else {
-                    // Si el servidor dice que no
                     const errorData = await respuesta.json();
-                    alert('Error del servidor: ' + (errorData.mensaje || 'Revisa la consola'));
-                    console.error("Error detallado:", errorData);
+                    alert('Error: ' + errorData.mensaje);
                 }
-
             } catch (error) {
-                alert('Error de conexión: Asegúrate de que node server.js esté corriendo.');
-                console.error(error);
+                alert('Error de conexión.');
             }
         });
 
@@ -207,16 +225,32 @@
             } 
         }
 
-        // EL GUARDIA (Seguridad)
+        // --- ANIMACIÓN AL CERRAR SESIÓN ---
+        function cerrarSesion() {
+            sessionStorage.removeItem('esAdmin');
+            
+            // Aquí activamos el taco manualmente antes de irnos
+            activarModoTaco('login.html');
+        }
+
+        // ANIMACIÓN GENÉRICA
+        function activarModoTaco(urlDestino) {
+            const overlay = document.getElementById('pantalla-taco-global');
+            overlay.classList.add('active');
+            
+            setTimeout(() => {
+                overlay.classList.add('bye-bye'); 
+                setTimeout(() => {
+                    window.location.href = urlDestino;
+                }, 400); 
+            }, 800); 
+        }
+
+        // SEGURIDAD SIMPLE
         if (!sessionStorage.getItem('esAdmin')) {
             window.location.href = 'login.html';
         }
         
-        function cerrarSesion() {
-            sessionStorage.removeItem('esAdmin');
-            window.location.href = 'login.html';
-        }
-
         cargarRecetas();
     </script>
 </body>
