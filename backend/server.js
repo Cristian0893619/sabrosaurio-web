@@ -25,6 +25,17 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/sabrosaurio.html'));
 });
 
+// Ruta para la página principal (ya la tienes)
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/sabrosaurio.html'));
+});
+
+// --- AGREGA ESTO ---
+// Ruta para la vista de Administrador
+app.get('/admin.html', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/admin.html'));
+});
+
 // El puerto también debe ser dinámico para la nube
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
