@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sabrosaurio</title>
-    <link rel="icon" type="image/png" href="sabrosaurio.ico">
     <style>
         /* --- ESTILOS GENERALES --- */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -21,7 +20,7 @@
         .logo h1 { font-size: 2.5rem; font-weight: 800; } .logo span { color: var(--bright-green); }
         nav { background-color: var(--white); padding: 0.8rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         nav ul { display: flex; justify-content: center; list-style: none; flex-wrap: wrap; }
-        nav a { color: black; text-decoration: none; font-weight: bold; text-transform: uppercase; margin: 0 15px; transition: color 0.3s; }
+        nav a { color: black; text-decoration: none; font-weight: bold; text-transform: uppercase; margin: 0 15px; transition: color 0.3s; cursor: pointer; }
         nav a:hover { color: var(--primary); }
 
         /* --- Hero & Welcome --- */
@@ -50,29 +49,27 @@
 
         footer { background-color: var(--primary); color: var(--light); text-align: center; padding: 2rem; margin-top: 3rem; border-top: 4px solid var(--light); }
 
-        /* --- ANIMACIÓN TACO (CSS) --- */
+        /* --- ESTILOS DE LA ANIMACIÓN DE CARGA (TACO) --- */
         .taco-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: var(--mexico-green); z-index: 9999;
+            background-color: #006847; 
+            z-index: 99999;
             display: flex; justify-content: center; align-items: center; flex-direction: column;
             opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
         }
         .taco-overlay.active { opacity: 1; pointer-events: all; }
         
         .el-taco-giratorio {
-            font-size: 6rem; /* Tamaño del Emoji */
-            animation: girarTaco 3s linear infinite; /* Gira siempre */
+            font-size: 6rem; 
+            animation: girarTaco 3s linear infinite; 
             transition: transform 0.5s cubic-bezier(0.6, -0.28, 0.735, 0.045); 
-            transform: scale(0); /* Empieza oculto */
+            transform: scale(0);
         }
         
-        /* Al activarse, el taco crece */
         .taco-overlay.active .el-taco-giratorio { transform: scale(1); }
-        
-        /* Al irse, el taco se encoge y gira rápido */
         .taco-overlay.bye-bye .el-taco-giratorio { transform: scale(0) rotate(720deg); transition: transform 0.5s ease-in; }
-
-        .texto-cargando { color: white; margin-top: 20px; font-weight: bold; font-size: 1.5rem; animation: parpadeo 1s infinite; }
+        
+        .texto-cargando { color: white; margin-top: 20px; font-weight: bold; font-size: 1.5rem; animation: parpadeo 1s infinite; font-family: sans-serif; }
 
         @keyframes girarTaco { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         @keyframes parpadeo { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
@@ -80,7 +77,7 @@
 </head>
 <body>
     
-    <div class="taco-overlay" id="pantalla-taco">
+    <div class="taco-overlay" id="pantalla-taco-global">
         <span class="el-taco-giratorio">🌮</span>
         <div class="texto-cargando">Preparando pedido...</div>
     </div>
@@ -95,8 +92,7 @@
             <li><a href="#inicio">Inicio</a></li>
             <li><a href="#bienvenida">Bienvenida</a></li>
             <li><a href="#recetas">Recetas</a></li>
-            <li><a href="todaslasrecetas.html">Todas</a></li>
-            <li><a href="#contacto">Contacto</a></li>
+            <li><a href="todaslasrecetas.html">Todas</a></li> <li><a href="#contacto">Contacto</a></li>
         </ul>
     </nav>
     
@@ -150,32 +146,43 @@
     </footer>
 
     <script>
+        // RUTA RELATIVA PARA QUE FUNCIONE EN RENDER Y LOCALHOST
         const API_URL = '/api/recetas';
         const IMAGES_URL = '/public/';
 
-        // --- FUNCIÓN DE ANIMACIÓN ---
-        function irAReceta(event, urlDestino) {
-            event.preventDefault(); // Detenemos el salto inmediato
-            
-            const overlay = document.getElementById('pantalla-taco');
-            
-            // 1. APARECE EL FONDO Y EL TACO
+        // --- SCRIPT DE ANIMACIÓN AUTOMÁTICA ---
+        document.addEventListener("DOMContentLoaded", () => {
+            const todosLosLinks = document.querySelectorAll('a');
+
+            todosLosLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    const destino = link.getAttribute('href');
+                    
+                    // Validaciones para no activar animación si no es necesario
+                    if (!destino || destino.startsWith('javascript:')) return;
+                    if (destino.startsWith('#')) return; // Enlace interno
+                    if (link.getAttribute('target') === '_blank') return; // Otra pestaña
+
+                    // Si pasa las validaciones, activamos el taco
+                    e.preventDefault(); 
+                    activarModoTaco(destino);
+                });
+            });
+        });
+
+        function activarModoTaco(urlDestino) {
+            const overlay = document.getElementById('pantalla-taco-global');
             overlay.classList.add('active');
             
-            // 2. Esperamos un poquito para que se vea girando (0.8 segundos)
             setTimeout(() => {
-                
-                // 3. EFECTO DE ALEJARSE (Zoom out rápido)
                 overlay.classList.add('bye-bye'); 
-                
-                // 4. Cambiamos de página
                 setTimeout(() => {
                     window.location.href = urlDestino;
-                }, 400); // Esperamos a que termine el zoom out
-                
+                }, 400); 
             }, 800); 
         }
 
+        // --- CARGA DE RECETAS ---
         async function cargarMenu() {
             try {
                 const response = await fetch(API_URL);
@@ -187,8 +194,6 @@
 
                 if (recetas.length === 0) { contenedor.innerHTML = '<p>No hay recetas.</p>'; return; }
 
-                // --- EL CAMBIO ESTÁ AQUÍ ---
-                // .slice(0, 3) significa: "Corta la lista y dame solo desde la 0 hasta la 3"
                 const destacadas = recetas.slice(0, 3); 
 
                 destacadas.forEach(receta => {
@@ -204,7 +209,7 @@
                                     <span>🔥 ${receta.dificultad || 'Media'}</span>
                                 </div>
                                 
-                                <a href="detalle.html?id=${receta._id}" class="btn" onclick="irAReceta(event, this.href)">Ver Receta</a>
+                                <a href="detalle.html?id=${receta._id}" class="btn">Ver Receta</a>
                             </div>
                         </div>
                     `;
